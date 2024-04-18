@@ -5,6 +5,8 @@ import numpy as np
 
 
 cam = cv2.VideoCapture(0)
+cam.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
+cam.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
 face_mesh = mp.solutions.face_mesh.FaceMesh(refine_landmarks=True)
 
 screen_w,screen_h = pyautogui.size()
@@ -50,7 +52,8 @@ while True:
 
         # We are considering only one face    
         landmarks = face_landmarks[0].landmark 
-        # Cursor Movement
+        
+        # Cursor Movement --------THIS LOGIC NEEDS TO BE AT THE END---------
     #     x = 0
     #     y = 0
     #     for i in landmarks[474:478]:
@@ -73,18 +76,22 @@ while True:
 ##############################################################################
         
         # Landmarks are selected to make a rectangle from right eye as ROI
-        points = [landmarks[340],landmarks[301],landmarks[6],landmarks[9]]
+        points = [landmarks[340],landmarks[301],landmarks[6],landmarks[9],landmarks[380],landmarks[386]]
         
         x_points=[]
         y_points=[]
 
+        # left_eye_upper_edge = output.multi_face_landmarks[0].landmark[face_mesh.FaceLandmark.LEFT_EYE_UPPER_EDGE]
+        # points.append(left_eye_upper_edge)
         for point in points:
 
             x_points.append(int(point.x*frame_w)) 
             y_points.append(int(point.y*frame_h))
-        #     x = int(point.x*frame_w)
-        #     y = int(point.y*frame_h)
-        #     cv2.circle(frame,(x,y),2,(0,255,222))    
+            x = int(point.x*frame_w)
+            y = int(point.y*frame_h)
+            cv2.circle(frame,(x,y),2,(0,255,222))    
+
+        # vertical_position = left_eye_upper_edge.y - left_eye_center.y
 
         min_x = min(x_points)
         max_x = max(x_points)
@@ -97,7 +104,18 @@ while True:
         ################## IMAGE CROPING TO GET BOUNDING BOX ##########################
 
         # Eye box is extracted out to get only one eye out of the face
-        eyebox = frame[min_y:max_y, min_x:max_x]
+
+        # for point in landmarks:
+
+        #     x_points.append(int(point.x*frame_w)) 
+        #     y_points.append(int(point.y*frame_h))
+        #     x = int(point.x*frame_w)
+        #     y = int(point.y*frame_h)
+        #     cv2.circle(frame,(x,y),2,(0,255,222))    
+
+        # eyebox = frame[min_y:max_y, min_x:max_x]
+
+        
         # cv2.imshow('Ap ki aankh nikal di', eyebox)
 
 ##################################################################################################################################
@@ -120,15 +138,19 @@ while True:
         #     cv2.circle(frame, (x, y), 2, (colo_val_1,colo_val_2,colo_val_3))
 
     # Eye box scaling
-    scaled_image = upscale_image(eyebox, 400)  # Upscale by 200%
+    # scaled_image = upscale_image(eyebox, 400)  # Upscale by 200%
     # Sharpening of scaled image
-    sharpened_image = cv2.filter2D(scaled_image, -1, kernel)
+    # sharpened_image = cv2.filter2D(scaled_image, -1, kernel)
     # Saving output images for further analysis
 
-    cv2.imwrite('eye.jpg', eyebox)  # Save the upscaled image    
-    cv2.imwrite('scaled.jpg', scaled_image)  # Save the upscaled image    
-    cv2.imwrite('sharped.jpg', sharpened_image)  # Save the upscaled image    
-    cv2.imshow("A moving curosr using Eye ball movement ",eyebox)
-    
-    cv2.waitKey(1)
+    # output = face_mesh.process(eyebox)
+    # cv2.imshow("Ye to hoga",output.multi_face_landmarks[0])
+
+    # cv2.imwrite('eye.jpg', eyebox)  # Save the upscaled image    
+    # cv2.imwrite('scaled.jpg', scaled_image)  # Save the upscaled image    
+    # cv2.imwrite('sharped.jpg', sharpened_image)  # Save the upscaled image    
+    cv2.imshow("A moving curosr using Eye ball movement ",frame)
+    if cv2.waitKey(1) & 0xFF==ord('q'):
+        break
+    # cv2.waitKey(1)
 
